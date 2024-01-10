@@ -12,6 +12,9 @@ from dataclasses import dataclass
 from src.components.data_transformation import DataTransformation
 from src.components.data_transformation import DataTransformationConfig
 
+from src.components.model_trainer import ModelTrainerConfig
+from src.components.model_trainer import ModelTrainer
+
 
 @dataclass
 class DataIngestionConfig:
@@ -23,36 +26,42 @@ class DataIngestion:
     def __init__(self):
         self.ingestion_congfig=DataIngestionConfig()
         
-    def initiate_data_ingestion(Self):
+    def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion method or components")
         try:
             df = pd.read_csv(r"F:\ML_Project\notebook\data\stud.csv")
-            logging.info("Read the dataset as dataframe")
-            
-            os.makedirs(os.path.dirname(Self.ingestion_congfig.train_data_path),exist_ok=True)
-            
-            df.to_csv(Self.ingestion_congfig.raw_data_path,index=False,header=True)
-            
+            logging.info("Read the dataset as a dataframe")
+
+            os.makedirs(os.path.dirname(self.ingestion_congfig.train_data_path), exist_ok=True)
+
+            df.to_csv(self.ingestion_congfig.raw_data_path, index=False, header=True)
+
             logging.info("Train Test Split Initiated")
-            train_set,test_set=train_test_split(df,test_size=0.2,random_state=42)
-            
-            train_set.to_csv(Self.ingestion_congfig.train_data_path,index=False,header=True)
-            
-            test_set.to_csv(Self.ingestion_congfig.test_data_path,index=False,header=True)
-            
+            train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+
+            train_set.to_csv(self.ingestion_congfig.train_data_path, index=False, header=True)
+            test_set.to_csv(self.ingestion_congfig.test_data_path, index=False, header=True)
+
             logging.info("Ingestion of the data is completed")
-            
-            return(
-                Self.ingestion_congfig.train_data_path,
-                Self.ingestion_congfig.test_data_path
-            )
-            
+
+            return self.ingestion_congfig.train_data_path, self.ingestion_congfig.test_data_path
+
         except Exception as e:
-            raise CustomerException(e,sys)
+            raise CustomerException(e, sys)
+
+
         
 if __name__ == "__main__":
-    obj=DataIngestion()
-    train_data,test_data=obj.initiate_data_ingestion()
-    
-    data_transformation=DataTransformation()
-    data_transformation.initiate_data_transformation(train_data,test_data)
+    obj = DataIngestion()
+    data_paths = obj.initiate_data_ingestion()
+
+    try:
+        data_transformation = DataTransformation()
+        train_arr, test_arr, _ = data_transformation.initiate_data_transformation(*data_paths)
+
+        modeltrainer = ModelTrainer()
+        print(modeltrainer.initiate_model_trainer(train_arr, test_arr))
+
+    except Exception as e:
+        raise CustomerException(e, sys)
+
