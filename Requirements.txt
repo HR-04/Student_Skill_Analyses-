@@ -7,4 +7,6 @@ dill
 dataclasses
 xgboost
 catboost
+flask
+flask-cors
 -e .
